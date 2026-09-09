@@ -1,0 +1,13 @@
+# Riippuvuudet (asennetaan uudelleen npm install:lla, ei tarvitse versionhallintaan)
+node_modules/
+
+# Salaiset tunnistetiedot - EI KOSKAAN Gitiin
+.env
+
+# Botin käynnistyksen aikainen lukkotiedosto - konekohtainen, ei tarpeen jaettavaksi
+.bot.lock
+
+# Editorin/käyttöjärjestelmän omat tiedostot
+.vscode/
+.DS_Store
+Thumbs.db

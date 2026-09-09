@@ -1,0 +1,22 @@
+{
+  "name": "twitch_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "stop": "node scripts/stop-bot.js",
+    "restart": "npm run stop && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "tmi.js": "^1.8.5"
+  }
+}
+
+
