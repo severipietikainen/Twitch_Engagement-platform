@@ -1,4 +1,4 @@
-Paivamaara,Peli,Vaihe,Kesto_min,Katsojat_ka,Katsojat_huippu_permin,Chattiviestit,Viestit_per_katsoja_per_min,Uudet_seuraajat_csv,Uudet_tilaukset_csv,Erilliset_katsojat,Erilliset_chattaajat,Lahdetiedosto
+Date,Game,Phase,DurationMin,AvgViewers,PeakViewersPerMin,ChatMessages,MessagesPerViewerPerMin,NewFollowersCsv,NewSubsCsv,UniqueViewers,UniqueChatters,SourceFile
 2026-08-31,mc,baseline,139,6.99,14,252,0.2593,1,0,,,2026-08-31_mc_baseline.csv
 2026-09-01,geo,baseline,80,14.15,22,180,0.159,0,1,,,2026-09-01_geo_baseline.csv
 2026-09-02,geo,baseline,122,11.41,19,417,0.2997,2,4,,,2026-09-02_geo_baseline.csv
