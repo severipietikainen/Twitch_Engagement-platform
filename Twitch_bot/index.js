@@ -1,5 +1,5 @@
 // index.js
-// Ensimmäinen askel: yhdistetään Twitch-chattiin ja tulostetaan saapuvat viestit.
+// First step: connect to Twitch chat and print incoming messages.
 
 const fs = require('fs');
 const path = require('path');
@@ -58,35 +58,35 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-require('dotenv').config(); // lukee .env-tiedoston ja lisää sen arvot process.env-olioon
-const tmi = require('tmi.js'); // Twitch-chat-kirjasto
- 
-// Luodaan tmi-asiakas (client) käyttäen .env:stä luettuja tunnistetietoja.
+require('dotenv').config(); // reads the .env file and adds its values to process.env
+const tmi = require('tmi.js'); // Twitch chat library
+
+// Create a tmi client using the credentials read from .env.
 const client = new tmi.Client({
-  options: { debug: true }, // tulostaa yhteyden tilan konsoliin (kätevä kehityksessä)
+  options: { debug: true }, // prints connection status to the console (handy during development)
   identity: {
     username: process.env.TWITCH_BOT_USERNAME,
-    password: process.env.TWITCH_OAUTH_TOKEN, // pitää alkaa "oauth:"-etuliitteellä
+    password: process.env.TWITCH_OAUTH_TOKEN, // must start with the "oauth:" prefix
   },
-  channels: [process.env.TWITCH_CHANNEL], // mihin kanavaan/kanaviin liitytään
+  channels: [process.env.TWITCH_CHANNEL], // which channel(s) to join
 });
- 
-// connect() palauttaa Promisen - .catch() napsii kiinni jos yhteys epäonnistuu
-// (esim. väärä token tai käyttäjänimi) ja tulostaa selkeän virheen kaatumisen sijaan.
-client.connect().catch(virhe => {
-  console.error('Yhteyden muodostaminen epäonnistui:', virhe);
+
+// connect() returns a Promise - .catch() catches it if the connection fails
+// (e.g. wrong token or username) and prints a clear error instead of crashing.
+client.connect().catch(error => {
+  console.error('Failed to establish connection:', error);
 });
- 
-// client.on('message', ...) rekisteröi tapahtumankuuntelijan.
-// Tämä funktio suoritetaan AINA kun chattiin tulee uusi viesti.
+
+// client.on('message', ...) registers an event listener.
+// This function runs EVERY TIME a new message arrives in chat.
 client.on('message', (channel, tags, message, self) => {
-  // self on true jos viestin lähetti botti itse - ohitetaan nämä,
-  // muuten botti voisi reagoida omiin viesteihinsä loputtomasti.
+  // self is true if the bot itself sent the message - these are ignored,
+  // otherwise the bot could end up reacting to its own messages endlessly.
   if (self) return;
 
   const text = message.trim().toLowerCase();
 
-  // tags sisältää metadataa viestistä, esim. lähettäjän näyttönimen.
+  // tags contains metadata about the message, e.g. the sender's display name.
   console.log(`[${channel}] ${tags['display-name']}: ${message}`);
 
   if (text === 'hi') {
