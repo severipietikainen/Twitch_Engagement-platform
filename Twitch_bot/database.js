@@ -16,22 +16,30 @@ db.exec(
 
     `CREATE TABLE IF NOT EXISTS games (
         id INTEGER PRIMARY KEY,
-        name TEXT
+        name TEXT UNIQUE
         )`
-);
+)
 
 db.exec(
 
     `CREATE TABLE IF NOT EXISTS game_events (
         id INTEGER PRIMARY KEY,
-        user_id INTEGER FOREIGN KEY REFERENCES users(id),
-        game_id INTEGER FOREIGN KEY REFERENCES games(id),
+        user_id INTEGER,       
+        game_id INTEGER,        
         timestamp TEXT,
         result TEXT,
         points_earned INTEGER,
         xp_earned INTEGER,
-        metadata TEXT
+        metadata TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(id),
+        FOREIGN KEY(game_id) REFERENCES games(id)
         )`
+    )
+
+    db.exec(
+
+    `INSERT OR IGNORE INTO games (name) VALUES ('slots'), ('duel'), ('coin_flip')`
+     
     );
 
 

@@ -1,6 +1,5 @@
 // readCsv.js
-// First step, kept as a simple standalone example: read one CSV file,
-// convert values to numbers, and print summary statistics.
+
 
 const fs = require('fs');
 
