@@ -2,13 +2,15 @@ const {DatabaseSync} = require ('node:sqlite')
 
 const db = new DatabaseSync('./data/bot.sqlite');
 
+
+
 db.exec(
 
     `CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
-        username TEXT,
-        total_xp INTEGER,
-        total_points INTEGER
+        username TEXT UNIQUE,
+        total_xp INTEGER NOT NULL DEFAULT 0,
+        total_points INTEGER NOT NULL DEFAULT 0
     )`
 );
 
@@ -41,6 +43,7 @@ db.exec(
     `INSERT OR IGNORE INTO games (name) VALUES ('slots'), ('duel'), ('coin_flip')`
      
     );
+    
 
 
 
