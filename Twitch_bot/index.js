@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const lockFile = path.join(__dirname, '.bot.lock');
+const database = require('./db'); // Import the database module
 
 function isProcessRunning(pid) {
   try {
@@ -71,11 +72,40 @@ const client = new tmi.Client({
   channels: [process.env.TWITCH_CHANNEL], // which channel(s) to join
 });
 
-// connect() returns a Promise - .catch() catches it if the connection fails
-// (e.g. wrong token or username) and prints a clear error instead of crashing.
-client.connect().catch(error => {
-  console.error('Failed to establish connection:', error);
-});
+  
+  const commands = new Map(); 
+  commands.set('hello', handleHello);
+  commands.set('ping', handlePing);
+  commands.set('say', handleSay);
+  commands.set('points', handlePoints);
+
+  function handlePoints(channel, tags, args) {
+    const username = tags['display-name'];
+    const user = database.createOrGetUser(username);
+    client.say(channel, `${username}, you have ${user.total_points} points and ${user.total_xp} XP.`);
+  }
+
+
+
+  function handleSay(channel, tags, args) {
+    const message = args.join(' ');
+    client.say(channel, message);
+  }
+
+  function handlePing(channel, tags, args) {
+    client.say(channel, `Pong!`);
+  }
+
+  function handleHello(channel, tags, args) {
+    
+      client.say(channel, `Hello, ${tags['display-name']}! You have set a command`);
+    
+  }
+
+
+
+
+
 
 // client.on('message', ...) registers an event listener.
 // This function runs EVERY TIME a new message arrives in chat.
@@ -85,11 +115,50 @@ client.on('message', (channel, tags, message, self) => {
   if (self) return;
 
   const text = message.trim().toLowerCase();
-
-  // tags contains metadata about the message, e.g. the sender's display name.
+  const command = text.startsWith('!') ? text.split(' ')[0] : null; // the first word is the command, the rest are arguments
   console.log(`[${channel}] ${tags['display-name']}: ${message}`);
 
-  if (text === 'hi') {
-    client.say(channel, `Hi ${tags['display-name']}!`);
+
+  if (!command) {
+    return; // not a command, ignore it
   }
+
+  const [word, ...args] = text.split(/\s+/);
+  const name = word.slice(1);
+  const handler = commands.get(name);  
+  
+
+  if (!handler) {
+    return; // no handler for this command, ignore it
+  }
+
+  handler(channel, tags, args); // call the handler function for this command
+
+
 });
+
+client.connect().catch(error => {
+  console.error('Failed to establish connection:', error);
+});
+
+
+
+
+
+
+ 
+
+
+  
+
+ 
+  
+  
+
+
+
+
+
+
+
+

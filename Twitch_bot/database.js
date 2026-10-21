@@ -26,9 +26,9 @@ db.exec(
 
     `CREATE TABLE IF NOT EXISTS game_events (
         id INTEGER PRIMARY KEY,
-        user_id INTEGER,       
-        game_id INTEGER,        
-        timestamp TEXT,
+        user_id INTEGER NOT NULL,       
+        game_id INTEGER NOT NULL,        
+        timestamp TEXT NOT NULL,
         result TEXT,
         points_earned INTEGER,
         xp_earned INTEGER,
@@ -47,4 +47,4 @@ db.exec(
 
 
 
-console.log("it worked");
+console.log("Database initialized");

@@ -15,6 +15,6 @@ Thumbs.db
 # SQLite files
 .db
 .sqlite
-
+.sqlite_harjoitus
 # Notes
 .md
