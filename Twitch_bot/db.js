@@ -6,9 +6,11 @@ const { DatabaseSync } = require('node:sqlite');
 
 const db = new DatabaseSync(dbPath);
 
+const STARTING_POINTS = 100;
+
 
 const createUser = db.prepare(
-    ` INSERT OR IGNORE INTO users (username) VALUES (?)`
+    ` INSERT OR IGNORE INTO users (username, total_points) VALUES (?, ?)`
 );
 
 const getUser = db.prepare(
@@ -19,14 +21,28 @@ const addPoints = db.prepare(
        `UPDATE users SET total_points = total_points + ?  WHERE username = ?`
 );
 
+function normalizeUsername(username) {
+    return username.trim().toLowerCase();
+}
 
 function createOrGetUser(username) {
-    const user = username.trim().toLowerCase();
-    createUser.run(user);
+    const user = normalizeUsername(username);
+    createUser.run(user, STARTING_POINTS);
+    return getUser.get(user);
+}
+
+function addUserPoints(username, points) {
+    const user = normalizeUsername(username);
+    const result = addPoints.run(points, user);
+    if (result.changes === 0) {
+        console.error(`User ${user} not found in the database.`);
+
+        return null;
+    }
     return getUser.get(user);
 }
 
 
 
 
-module.exports = { createOrGetUser };
+module.exports = { createOrGetUser, addUserPoints };

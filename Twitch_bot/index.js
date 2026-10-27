@@ -75,25 +75,38 @@ const client = new tmi.Client({
   
   const commands = new Map(); 
   commands.set('hello', handleHello);
-  commands.set('ping', handlePing);
-  commands.set('say', handleSay);
   commands.set('points', handlePoints);
+  commands.set('givepoints', handleGivePoints);
 
   function handlePoints(channel, tags, args) {
-    const username = tags['display-name'];
+    const username = tags.username;
     const user = database.createOrGetUser(username);
     client.say(channel, `${username}, you have ${user.total_points} points and ${user.total_xp} XP.`);
   }
 
+  function handleGivePoints(channel, tags, args) {
+    const username = tags.username;
+    const [target, amountText] = args;
+    const amount = Number(amountText);    
+    
+    if (username.toLowerCase() !== process.env.TWITCH_CHANNEL.toLowerCase()) {
+      
+      return;
+    }
 
+    if (!Number.isInteger(amount) || amount <= 0) {
+      client.say(channel, `${username}, please provide a valid positive integer for the points.`);
+      return;
+    }
 
-  function handleSay(channel, tags, args) {
-    const message = args.join(' ');
-    client.say(channel, message);
-  }
+    const cleantarget = target.replace('@', ''); // Remove @ if the user mentioned someone
+    const updatedUser = database.addUserPoints(cleantarget, amount);
 
-  function handlePing(channel, tags, args) {
-    client.say(channel, `Pong!`);
+    if (updatedUser === null) {
+      client.say(channel, `${username}, user ${cleantarget} not found in the database.`);
+      return;
+    }
+    client.say(channel, `${cleantarget} has been given ${amount} points. They now have ${updatedUser.total_points} points`);
   }
 
   function handleHello(channel, tags, args) {
@@ -132,7 +145,11 @@ client.on('message', (channel, tags, message, self) => {
     return; // no handler for this command, ignore it
   }
 
-  handler(channel, tags, args); // call the handler function for this command
+  try {
+  handler(channel, tags, args);
+  } catch (error) {
+  console.error('Command failed:', name, error);
+  }
 
 
 });
