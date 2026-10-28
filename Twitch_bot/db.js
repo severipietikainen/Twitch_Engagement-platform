@@ -21,6 +21,10 @@ const addPoints = db.prepare(
        `UPDATE users SET total_points = total_points + ?  WHERE username = ?`
 );
 
+const trySpendPoints = db.prepare(
+    `UPDATE users SET total_points = total_points - ? WHERE username = ? AND total_points >= ?`
+);
+
 function normalizeUsername(username) {
     return username.trim().toLowerCase();
 }
@@ -42,7 +46,23 @@ function addUserPoints(username, points) {
     return getUser.get(user);
 }
 
+function spendUserPoints(username, points) {
+
+    const user = normalizeUsername(username);
+
+    if (!Number.isInteger(points) || points <= 0) {
+        throw new Error('Points to spend must be a positive integer.');
+    }
+    const result = trySpendPoints.run(points, user, points);
+
+    if (result.changes === 0) {
+        
+        return null;
+    }
+    
+        return getUser.get(user);
+    
+}
 
 
-
-module.exports = { createOrGetUser, addUserPoints };
+module.exports = { createOrGetUser, addUserPoints, spendUserPoints };

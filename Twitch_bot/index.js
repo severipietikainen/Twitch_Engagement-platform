@@ -77,6 +77,27 @@ const client = new tmi.Client({
   commands.set('hello', handleHello);
   commands.set('points', handlePoints);
   commands.set('givepoints', handleGivePoints);
+  commands.set('bettest', handleBetTest);
+
+  function handleBetTest(channel, tags, args) {
+    const username = tags.username;
+    const [amountText] = args;
+    const amount = Number(amountText);
+    const user = database.createOrGetUser(username);
+
+    if (!Number.isInteger(amount) || amount <= 0) {
+      client.say(channel, `${username}, please provide a valid positive integer for the points.`);
+      return;
+    }
+    const updatedUser = database.spendUserPoints(username, amount);
+
+    if (updatedUser === null) {
+      client.say(channel, `${username}, you do not have enough points to spend. You currently have ${user.total_points} points.`);
+      return;
+    }
+
+    client.say(channel, `${username}, you have spent ${amount} points. You now have ${updatedUser.total_points} points.`);
+  }
 
   function handlePoints(channel, tags, args) {
     const username = tags.username;
@@ -89,8 +110,7 @@ const client = new tmi.Client({
     const [target, amountText] = args;
     const amount = Number(amountText);    
     
-    if (username.toLowerCase() !== process.env.TWITCH_CHANNEL.toLowerCase()) {
-      
+    if (username.toLowerCase() !== process.env.TWITCH_CHANNEL.toLowerCase()) {      
       return;
     }
 
