@@ -6,6 +6,7 @@ const path = require('path');
 
 const lockFile = path.join(__dirname, '.bot.lock');
 const database = require('./db'); // Import the database module
+const { coinFlip } = require('./games/coinFlip'); // Import the games module
 
 function isProcessRunning(pid) {
   try {
@@ -62,6 +63,7 @@ process.on('SIGTERM', () => {
 require('dotenv').config(); // reads the .env file and adds its values to process.env
 const tmi = require('tmi.js'); // Twitch chat library
 
+
 // Create a tmi client using the credentials read from .env.
 const client = new tmi.Client({
   options: { debug: true }, // prints connection status to the console (handy during development)
@@ -77,9 +79,9 @@ const client = new tmi.Client({
   commands.set('hello', handleHello);
   commands.set('points', handlePoints);
   commands.set('givepoints', handleGivePoints);
-  commands.set('bettest', handleBetTest);
+  commands.set('coin', handleCoinFlip);
 
-  function handleBetTest(channel, tags, args) {
+  function handleCoinFlip(channel, tags, args) {
     const username = tags.username;
     const [amountText] = args;
     const amount = Number(amountText);
@@ -89,14 +91,29 @@ const client = new tmi.Client({
       client.say(channel, `${username}, please provide a valid positive integer for the points.`);
       return;
     }
-    const updatedUser = database.spendUserPoints(username, amount);
 
+    const updatedUser = database.spendUserPoints(username, amount);
+    
     if (updatedUser === null) {
       client.say(channel, `${username}, you do not have enough points to spend. You currently have ${user.total_points} points.`);
       return;
     }
 
-    client.say(channel, `${username}, you have spent ${amount} points. You now have ${updatedUser.total_points} points.`);
+    const game = coinFlip(amount);
+
+    database.recordGameResult({
+    userId: user.id,
+    gameName: 'coin_flip',
+    result: game.result,
+    stake: game.bet,
+    payout: game.payout,
+    xp: game.xp
+    });
+
+    console.log(`User ${username} played coin flip with ${amount} points. Result: ${game.result}, Payout: ${game.payout}, XP earned: ${game.xp}`);
+
+    client.say(channel, `${username}, you ${game.result}! You bet ${game.bet} points and won ${game.payout} points. You earned ${game.xp} XP.`);
+
   }
 
   function handlePoints(channel, tags, args) {
