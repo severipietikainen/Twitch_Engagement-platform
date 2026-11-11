@@ -7,7 +7,8 @@ const path = require('path');
 const lockFile = path.join(__dirname, '.bot.lock');
 const database = require('./db'); // Import the database module
 const { coinFlip } = require('./games/coinFlip'); // Import the games module
-
+const MIN_BET = 10; // Minimum bet amount for the coin flip game
+const MAX_BET = 100000; // Maximum bet amount for the coin flip game
 function isProcessRunning(pid) {
   try {
     process.kill(pid, 0);
@@ -26,7 +27,7 @@ function releaseLock() {
       }
     }
   } catch (error) {
-    // Ignore cleanup errors; the lock file is only a safety mechanism.
+    
   }
 }
 
@@ -87,8 +88,8 @@ const client = new tmi.Client({
     const amount = Number(amountText);
     const user = database.createOrGetUser(username);
 
-    if (!Number.isInteger(amount) || amount <= 0) {
-      client.say(channel, `${username}, please provide a valid positive integer for the points.`);
+    if (!Number.isSafeInteger(amount) || amount < MIN_BET || amount > MAX_BET) {
+      client.say(channel, `${username}, please provide a valid bet amount between ${MIN_BET} and ${MAX_BET}.`);
       return;
     }
 
@@ -101,7 +102,7 @@ const client = new tmi.Client({
 
     const game = coinFlip(amount);
 
-    database.recordGameResult({
+    const finalUser = database.recordGameResult({
     userId: user.id,
     gameName: 'coin_flip',
     result: game.result,
@@ -110,9 +111,14 @@ const client = new tmi.Client({
     xp: game.xp
     });
 
-    console.log(`User ${username} played coin flip with ${amount} points. Result: ${game.result}, Payout: ${game.payout}, XP earned: ${game.xp}`);
+    if (game.result === 'win') {
 
-    client.say(channel, `${username}, you ${game.result}! You bet ${game.bet} points and won ${game.payout} points. You earned ${game.xp} XP.`);
+      client.say(channel, `${username}, wins! and won ${game.payout - game.bet} points. You earned ${game.xp} XP.`);
+    } 
+    
+    else {
+      client.say(channel, `${username}, loses! You lost ${game.bet} points. You earned ${game.xp} XP.`);
+    }
 
   }
 
