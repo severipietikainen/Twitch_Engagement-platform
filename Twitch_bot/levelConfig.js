@@ -1,3 +1,8 @@
+
+
+
+
+
 const C = 80;
 
 const MAX_LEVEL = 99;
@@ -17,4 +22,9 @@ function xpForLevel(level) {
     return C * level * level;
 }
 
-module.exports = { levelFromXp, xpForLevel, MAX_LEVEL };
+function levelUpBonus(level) {
+    return 50 + 10 * level;
+}
+
+
+module.exports = { levelFromXp, xpForLevel, levelUpBonus, MAX_LEVEL };

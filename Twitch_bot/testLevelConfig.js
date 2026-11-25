@@ -1,4 +1,4 @@
-const { levelFromXp, xpForLevel, MAX_LEVEL } = require('./levelConfig');
+const { levelFromXp, xpForLevel, levelUpBonus, MAX_LEVEL } = require('./levelConfig');
 
 let failures = 0;
 
@@ -29,5 +29,9 @@ for (let level = 1; level <= MAX_LEVEL; level++) {
     check(`levelFromXp(xpForLevel(${level}) - 1)`, levelFromXp(threshold - 1), level - 1, false);
   }
 }
+
+check('levelUpBonus(2)', levelUpBonus(2), 70);
+check('levelUpBonus(10)', levelUpBonus(10), 150);
+check('levelUpBonus(99)', levelUpBonus(99), 1040);
 
 console.log(failures === 0 ? '\nAll tests passed' : `\n${failures} test(s) FAILED`);

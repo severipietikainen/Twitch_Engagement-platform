@@ -9,6 +9,8 @@ const database = require('./db'); // Import the database module
 const { coinFlip } = require('./games/coinFlip'); // Import the games module
 const MIN_BET = 10; // Minimum bet amount for the coin flip game
 const MAX_BET = 100000; // Maximum bet amount for the coin flip game
+const { levelFromXp, levelUpBonus } = require('./levelConfig');
+
 function isProcessRunning(pid) {
   try {
     process.kill(pid, 0);
@@ -82,6 +84,22 @@ const client = new tmi.Client({
   commands.set('givepoints', handleGivePoints);
   commands.set('coin', handleCoinFlip);
 
+
+  function checkLevelUp(channel, username, userBefore, userAfter) {
+    const fromLevel = levelFromXp(userBefore.total_xp);
+    const toLevel = levelFromXp(userAfter.total_xp);
+    if (toLevel <= fromLevel) return;
+
+    let bonus = 0;
+    for (let level = fromLevel + 1; level <= toLevel; level++) {
+    bonus += levelUpBonus(level);
+    }
+
+    database.recordLevelUp({ userId: userAfter.id, fromLevel, toLevel, bonus });
+    client.say(channel, `${username} reached level ${toLevel}! Bonus +${bonus} points.`);
+  } 
+
+
   function handleCoinFlip(channel, tags, args) {
     const username = tags.username;
     const [amountText] = args;
@@ -119,6 +137,8 @@ const client = new tmi.Client({
     else {
       client.say(channel, `${username}, loses! You lost ${game.bet} points. You earned ${game.xp} XP.`);
     }
+
+    checkLevelUp(channel, username, user, finalUser);
 
   }
 

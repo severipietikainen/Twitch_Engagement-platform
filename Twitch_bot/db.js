@@ -120,7 +120,39 @@ function recordGameResult({ userId, gameName, result, stake, payout, xp }) {
 
 }
 
+function recordLevelUp({ userId, fromLevel, toLevel, bonus }) {
+  if (!Number.isInteger(bonus) || bonus <= 0) {
+    throw new Error('Bonus must be a positive integer.');
+  }
+  const gameRow = getGame.get('level_up');
+  if (!gameRow) throw new Error('Game not found');
+
+  db.exec('BEGIN');
+  try {
+
+   
+    updatePlayer.run(bonus, 0, userId);
+   
+    insertGameEvent.run(
+      userId,
+      gameRow.id,
+      new Date().toISOString(),
+      'level_up',
+      bonus,
+      0,
+      JSON.stringify({ from: fromLevel, to: toLevel })
+    );
+    db.exec('COMMIT');
+
+
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
+  return getUserById.get(userId);
+}
 
 
 
-module.exports = { createOrGetUser, addUserPoints, spendUserPoints, recordGameResult };
+
+module.exports = { createOrGetUser, addUserPoints, spendUserPoints, recordGameResult, recordLevelUp };

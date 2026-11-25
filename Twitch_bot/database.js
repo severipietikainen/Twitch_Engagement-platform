@@ -40,7 +40,7 @@ db.exec(
 
     db.exec(
 
-    `INSERT OR IGNORE INTO games (name) VALUES ('slots'), ('duel'), ('coin_flip')`
+    `INSERT OR IGNORE INTO games (name) VALUES ('slots'), ('duel'), ('coin_flip'), ('level_up'), ('daily'), ('passive')`
      
     );
     
